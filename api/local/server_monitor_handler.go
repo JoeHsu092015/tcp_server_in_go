@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// MonitorMetric - client info metric
 type MonitorMetric struct {
 	Addr         string
 	StartTime    time.Time
@@ -16,6 +17,7 @@ type MonitorMetric struct {
 	Alive        bool
 }
 
+// ServerInfo - server info metric
 type ServerInfo struct {
 	ClientList   map[string]MonitorMetric
 	Lock         sync.RWMutex
@@ -23,7 +25,9 @@ type ServerInfo struct {
 }
 
 var (
+	// MonitorQueue - send client metric to server monitor from this channel
 	MonitorQueue chan MonitorMetric
+	// serverStatus - current server status with client info
 	serverStatus ServerInfo
 )
 
@@ -43,8 +47,10 @@ func ServerStatusHandler(w http.ResponseWriter, r *http.Request) {
 
 	var totalRemainingJobs int64
 	var remaingJob int
+
 	serverStatus.Lock.RLock()
 	totalProcessedJobs := serverStatus.ProcessedJob
+	// clients status statistic
 	for _, info := range serverStatus.ClientList {
 		clientCount++
 		remaingJob = 0
@@ -67,6 +73,7 @@ func ServerStatusHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(&s, "\n")
 	}
 	serverStatus.Lock.RUnlock()
+	// server status statistic
 	fmt.Fprint(&s, "========Server INFO========\n")
 	fmt.Fprint(&s, "current connections: ", clientCount, "\n")
 	fmt.Fprint(&s, "current remaining jobs: ", totalRemainingJobs, "\n")

@@ -21,7 +21,7 @@ func TestServerStatusHandler(t *testing.T) {
 			status, http.StatusOK)
 	}
 
-	expected := "========Client INFO========\n========Server INFO========\ncurent connections: 0\ncurent remaining jobs: 0\n"
+	expected := "========Client INFO========\n========Server INFO========\ncurrent connections: 0\ncurrent remaining jobs: 0\ntotal processed jobs: 0\n"
 	if rr.Body.String() != expected {
 		t.Errorf("handler returned unexpected body: got \n%v want \n%v",
 			rr.Body.String(), expected)

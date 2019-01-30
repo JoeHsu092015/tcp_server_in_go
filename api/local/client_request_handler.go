@@ -2,7 +2,6 @@ package local
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"net"
 	"net/textproto"
@@ -19,7 +18,6 @@ send 'quit' for close connection
 
 // IndexHandler - TCP server handler
 func IndexHandler(monitorQueue chan MonitorMetric, client net.Conn, server external.ExternalServer) {
-	fmt.Printf("client info:%v\n", client.RemoteAddr().String())
 
 	var clientQuery string
 	var err error
