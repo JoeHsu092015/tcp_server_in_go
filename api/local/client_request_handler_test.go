@@ -11,12 +11,13 @@ import (
 	"testing"
 )
 
+// TestIndexHandler - test client index
 func TestIndexHandler(t *testing.T) {
 
 	mockServer := &external.MockExternalServer{}
 	tcpAddr := "localhost:4455"
 	testQueue := make(chan local.MonitorMetric, 5)
-	defer close(testQueue)
+
 	go func() {
 		l, err := net.Listen("tcp", tcpAddr)
 		if err != nil {

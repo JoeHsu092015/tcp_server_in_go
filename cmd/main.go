@@ -34,11 +34,13 @@ func main() {
 
 }
 
+// getExternalServer - create external server
 func getExternalServer() external.ExternalServer {
 	//return &external.MyExternalServer{Addr: "http://192.168.1.153:80/tag", ReadTimeOut: 10 * time.Second, WriteTimeOut: 10 * time.Second}
 	return &external.MockExternalServer{}
 }
 
+// httpServer - server status http endpoint
 func httpServer() {
 
 	http.HandleFunc("/", local.ServerStatusHandler)
