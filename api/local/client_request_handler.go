@@ -23,6 +23,7 @@ func IndexHandler(monitorQueue chan MonitorMetric, client net.Conn, server exter
 	var err error
 	var serverResponse string
 	var w sync.WaitGroup
+	var metricMutex sync.Mutex
 
 	// monitor metric
 	var processReq int64
@@ -57,9 +58,13 @@ func IndexHandler(monitorQueue chan MonitorMetric, client net.Conn, server exter
 	w.Add(1)
 	go func(q chan MonitorMetric) {
 		defer w.Done()
+		var info MonitorMetric
 		for {
-			q <- MonitorMetric{Addr: client.RemoteAddr().String(), StartTime: startTime,
+			metricMutex.Lock()
+			info = MonitorMetric{Addr: client.RemoteAddr().String(), StartTime: startTime,
 				ProcessedReq: processReq, WaitProcess: waitingProcess, Alive: true}
+			metricMutex.Unlock()
+			q <- info
 			time.Sleep(1 * time.Second)
 			// if client disconnect stop gathering data
 			if !clientConnecting {
@@ -85,15 +90,24 @@ func IndexHandler(monitorQueue chan MonitorMetric, client net.Conn, server exter
 			break
 		}
 
+		// set waiting job flag
+		metricMutex.Lock()
 		waitingProcess = true
+		metricMutex.Unlock()
+
 		serverResponse, err = server.SendMessage(clientQuery)
-		waitingProcess = false
-		processReq++
+
 		if err != nil {
 			client.Write([]byte("send query to external server failed"))
 			break
 		}
 		client.Write([]byte(serverResponse))
+
+		// set waiting job flag and increment processed request count
+		metricMutex.Lock()
+		waitingProcess = false
+		processReq++
+		metricMutex.Unlock()
 	}
 	clientConnecting = false
 	log.Println(client.LocalAddr().String(), " disconnected")
